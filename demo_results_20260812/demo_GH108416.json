@@ -1,0 +1,277 @@
+{
+  "video": "inputs/Olympic Boxing Punch Classification Video Dataset/task_kam2_gh108416/data/GH108416.mp4",
+  "duration_sec": 146.02,
+  "summary": {
+    "review_status": "reviewed",
+    "review_model": "qwen3-vl-plus",
+    "review_provider": "bailian",
+    "media_mode": "images",
+    "summary": "比赛始于裁判指令后，红方（橙装）主动前压，蓝方（蓝装）多采用后退防守与反击。0-40秒为试探与中距离对峙阶段；40-80秒红方加快节奏，多次近身压迫并尝试组合拳，蓝方频繁侧移与搂抱化解；80秒后裁判介入暂停一次，恢复后双方节奏放缓，红方仍主导进攻但效率下降；120秒后蓝方短暂反扑，但整体被红方控制中心区域。无明确回合信号，全程为单阶段对抗。",
+    "rounds": [],
+    "phases": [
+      {
+        "start_time_sec": 0.0,
+        "end_time_sec": 41.72,
+        "label": "试探期",
+        "evidence": "direct"
+      },
+      {
+        "start_time_sec": 41.72,
+        "end_time_sec": 83.44,
+        "label": "对攻期",
+        "evidence": "direct"
+      },
+      {
+        "start_time_sec": 83.44,
+        "end_time_sec": 104.3,
+        "label": "暂停与调整期",
+        "evidence": "direct"
+      },
+      {
+        "start_time_sec": 104.3,
+        "end_time_sec": 146.02,
+        "label": "消耗与尾声期",
+        "evidence": "direct"
+      }
+    ],
+    "key_moments": [
+      {
+        "time_sec": 62.58,
+        "description": "红方连续三拳逼近蓝方至围绳，蓝方低头搂抱化解，裁判未立即分开",
+        "evidence": "direct"
+      },
+      {
+        "time_sec": 83.44,
+        "description": "裁判吹哨暂停，指向蓝方疑似犯规（可能为搂抱过久或头撞），双方短暂分离",
+        "evidence": "direct"
+      },
+      {
+        "time_sec": 104.3,
+        "description": "红方再次前压，蓝方后撤中出左直拳命中红方面部（可见头部后仰反应）",
+        "evidence": "direct"
+      },
+      {
+        "time_sec": 125.16,
+        "description": "红方背靠围绳防守，蓝方尝试两连击未果，随后双方拉开距离",
+        "evidence": "direct"
+      }
+    ],
+    "fighter_analysis": {
+      "red": {
+        "style": "进攻型（推断：持续前压、主动闭合距离、偏好近身缠斗）",
+        "punch_volume": "medium",
+        "observations": [
+          "多数时间占据中心区域",
+          "频繁使用刺拳试探后跟进摆拳",
+          "多次主动贴身搂抱或逼至围绳",
+          "在62.58秒、104.3秒等节点发起明显组合进攻"
+        ]
+      },
+      "blue": {
+        "style": "防守反击型（推断：依赖移动与时机，非被动挨打）",
+        "punch_volume": "medium",
+        "observations": [
+          "常以侧滑步后撤保持距离",
+          "防守时多用高架臂+低头躲闪",
+          "仅在对方失位时快速出拳（如104.3秒左直拳）",
+          "被逼至围绳时倾向搂抱而非硬抗"
+        ]
+      }
+    },
+    "momentum": {
+      "description": "红方在大部分时间控制节奏与中心位置，蓝方偶有有效反击但未能扭转空间劣势；红方头部受击次数视觉上略少，蓝方更多处于防守姿态",
+      "evidence": "direct"
+    },
+    "global_observations": [
+      "无电子计时器或回合铃声可见，全程无正式回合划分",
+      "裁判共两次明显介入：83.44秒暂停与125.16秒附近口头警告",
+      "观众席与裁判席人员全程静坐观察，无干扰行为",
+      "场地为室内篮球馆改造拳台，光线均匀，镜头固定无缩放"
+    ]
+  },
+  "candidates": [
+    {
+      "relative_start_sec": 1.714,
+      "relative_end_sec": 2.286,
+      "fighter": "blue",
+      "hand": "front",
+      "punch_type": "直拳",
+      "target_region": "head",
+      "amplitude": "full",
+      "sequence_id": 1,
+      "confidence": 0.9,
+      "start_time_sec": 1.714,
+      "end_time_sec": 2.286
+    },
+    {
+      "relative_start_sec": 2.286,
+      "relative_end_sec": 2.857,
+      "fighter": "blue",
+      "hand": "rear",
+      "punch_type": "直拳",
+      "target_region": "head",
+      "amplitude": "full",
+      "sequence_id": 1,
+      "confidence": 0.85,
+      "start_time_sec": 2.286,
+      "end_time_sec": 2.857
+    },
+    {
+      "relative_start_sec": 2.857,
+      "relative_end_sec": 3.429,
+      "fighter": "red",
+      "hand": "front",
+      "punch_type": "直拳",
+      "target_region": "torso",
+      "amplitude": "half",
+      "sequence_id": 2,
+      "confidence": 0.8,
+      "start_time_sec": 2.857,
+      "end_time_sec": 3.429
+    },
+    {
+      "relative_start_sec": 4.571,
+      "relative_end_sec": 5.143,
+      "fighter": "blue",
+      "hand": "rear",
+      "punch_type": "直拳",
+      "target_region": "head",
+      "amplitude": "full",
+      "sequence_id": 1,
+      "confidence": 0.9,
+      "start_time_sec": 8.571,
+      "end_time_sec": 9.143
+    },
+    {
+      "relative_start_sec": 5.714,
+      "relative_end_sec": 6.286,
+      "fighter": "red",
+      "hand": "front",
+      "punch_type": "直拳",
+      "target_region": "torso",
+      "amplitude": "half",
+      "sequence_id": 2,
+      "confidence": 0.85,
+      "start_time_sec": 9.714,
+      "end_time_sec": 10.286
+    },
+    {
+      "relative_start_sec": 6.286,
+      "relative_end_sec": 6.857,
+      "fighter": "blue",
+      "hand": "front",
+      "punch_type": "直拳",
+      "target_region": "head",
+      "amplitude": "full",
+      "sequence_id": 3,
+      "confidence": 0.9,
+      "start_time_sec": 10.286,
+      "end_time_sec": 10.857
+    },
+    {
+      "relative_start_sec": 7.429,
+      "relative_end_sec": 8.0,
+      "fighter": "red",
+      "hand": "rear",
+      "punch_type": "直拳",
+      "target_region": "head",
+      "amplitude": "full",
+      "sequence_id": 4,
+      "confidence": 0.85,
+      "start_time_sec": 11.429,
+      "end_time_sec": 12.0
+    }
+  ],
+  "fine_events": [
+    {
+      "review_status": "reviewed",
+      "review_model": "qwen3-vl-plus",
+      "review_provider": "bailian",
+      "media_mode": "images",
+      "is_punch": "yes",
+      "start_time_sec": 2.481,
+      "peak_time_sec": 2.734,
+      "end_time_sec": 2.987,
+      "fighter": "blue",
+      "hand": "front",
+      "punch_type": "直拳",
+      "amplitude": "full",
+      "target_region": "head",
+      "impact_area": "head_left",
+      "contact_evidence": "clear",
+      "hit_or_miss": "hit",
+      "blocked": "no",
+      "block_type": "无",
+      "reaction": "明显偏移",
+      "power": "medium",
+      "part_of_combo": "no",
+      "countered": "no",
+      "occluded": "no",
+      "confidence": 0.95,
+      "evidence": "direct",
+      "reason": "1.367秒蓝方前手启动出拳，1.620秒拳套清晰接触红方左侧面颊（头盔左侧），红方头部立即向右后方明显偏移；1.873秒拳已收回，无防守动作拦截。全程无遮挡，轨迹连续，符合直拳特征。",
+      "candidate": {
+        "relative_start_sec": 1.714,
+        "relative_end_sec": 2.286,
+        "fighter": "blue",
+        "hand": "front",
+        "punch_type": "直拳",
+        "target_region": "head",
+        "amplitude": "full",
+        "sequence_id": 1,
+        "confidence": 0.9,
+        "start_time_sec": 1.714,
+        "end_time_sec": 2.286
+      }
+    },
+    {
+      "review_status": "reviewed",
+      "review_model": "qwen3-vl-plus",
+      "review_provider": "bailian",
+      "media_mode": "images",
+      "is_punch": "yes",
+      "start_time_sec": 3.878,
+      "peak_time_sec": 4.131,
+      "end_time_sec": 4.384,
+      "fighter": "red",
+      "hand": "rear",
+      "punch_type": "直拳",
+      "amplitude": "full",
+      "target_region": "head",
+      "impact_area": "head_left",
+      "contact_evidence": "possible",
+      "hit_or_miss": "uncertain",
+      "blocked": "uncertain",
+      "block_type": "看不清",
+      "reaction": "遮挡看不清",
+      "power": "medium",
+      "part_of_combo": "no",
+      "countered": "no",
+      "occluded": "yes",
+      "confidence": 0.6,
+      "evidence": "direct",
+      "reason": "红方选手在2.192–2.698秒间明显完成一次后手直拳动作：右臂从屈肘蓄力（2.192）→伸展前冲（2.445达最大伸展）→回收（2.698），轨迹直线、幅度充分，符合full直拳特征；蓝方头部被护具及自身左臂部分遮挡，无法确认拳套是否接触头部或具体接触点；无可见头部偏移/晃动等反应证据；裁判未介入，非搂抱推搡。因关键接触瞬间被遮挡，无法判定hit/miss/block。",
+      "candidate": {
+        "relative_start_sec": 2.286,
+        "relative_end_sec": 2.857,
+        "fighter": "blue",
+        "hand": "rear",
+        "punch_type": "直拳",
+        "target_region": "head",
+        "amplitude": "full",
+        "sequence_id": 1,
+        "confidence": 0.85,
+        "start_time_sec": 2.286,
+        "end_time_sec": 2.857
+      }
+    }
+  ],
+  "vlm_status": "enabled",
+  "vlm_provider": "bailian",
+  "vlm_model": "qwen3-vl-plus",
+  "vlm_base_url": "https://llm-qi84d3ky9lhum2dr.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+  "vlm_media_mode": "images",
+  "vlm_calls": 15,
+  "vlm_failures": 0,
+  "vlm_last_error": ""
+}

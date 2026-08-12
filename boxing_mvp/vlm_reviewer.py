@@ -173,51 +173,70 @@ class VLMReviewer:
 
     def summarize_video(self, duration: float) -> dict[str, Any]:
         return self._generate(
-            f"""你是拳击视频分析员。分析整段视频，视频总时长为 {duration:.2f} 秒。
-目标是提供保守、可核验的比赛摘要，不是编故事，也不是统计所有动作。
-只记录视频中直接可见的内容；无法确认的内容写“未知”，不要根据拳击常识补全。
-不要把选手靠近、挥拳、身体反应或裁判动作单独当作命中。
-只有能看到拳套与头部/躯干发生清晰接触，才可在描述中称为命中；否则使用“疑似”“未确认”或“未知”。
-回合边界只有在视频中出现明确的回合开始/结束信号时才填写；不要因为服装变化、镜头切换或时间间隔擅自创造回合。
-区分红方和蓝方；如果颜色、身份或时间无法确认，使用 unknown。
-所有时间必须是整段视频的绝对秒数，范围为 0 到 {duration:.2f}。
+            f"""你是拳击视频分析员，负责给教练和运动员复盘整场比赛。
+视频总时长为 {duration:.2f} 秒。你有权限做深入分析，但必须区分：直接可见的事实（evidence=direct）、合理的推断（evidence=inferred）、完全无法确认（evidence=unknown）。
+
+分析要求：
+1. 比赛结构：只有出现明确的回合开始/结束信号才创建回合；否则按动作节奏划分为"阶段"，不要编造回合。
+2. 双方风格：根据整场出拳频率、移动、防守方式，用一段话分别描述红方和蓝方的风格（进攻型/防守型/游击型等），推断必须标注为推断。
+3. 关键时间点：找出比赛节奏变化的关键时间戳（例如某一方突然提速、出现决定性连击、某方开始搂抱消耗时间）。
+4. 出拳统计：对每一方估计全场出拳总量级（low<20拳 / medium 20-60拳 / high>60拳）和命中总量级，标注为估计，不要假装精确。
+5. 胜负趋势：只描述画面可见的优劣态势（谁控制距离、谁压迫、谁被击中更多），不宣布胜负。
+
+所有时间用整段视频绝对秒数，范围 0 到 {duration:.2f}。
 严格只返回一个 JSON 对象，不要 Markdown、解释或额外文本：
-{{"summary":"中文摘要","rounds":[{{"start_time_sec":0.0,"end_time_sec":0.0,"description":"只写可见事实"}}],"global_observations":["可见事实"]}}""",
+{{"summary":"中文摘要，300字以内，结构清晰","rounds":[{{"start_time_sec":0.0,"end_time_sec":0.0,"description":"只写可见事实"}}],"phases":[{{"start_time_sec":0.0,"end_time_sec":0.0,"label":"试探期/对攻期/消耗期/尾声","evidence":"direct|inferred|unknown"}}],"key_moments":[{{"time_sec":0.0,"description":"关键事件描述","evidence":"direct|inferred|unknown"}}],"fighter_analysis":{{"red":{{"style":"...","punch_volume":"low|medium|high","observations":["可见事实"]}},"blue":{{"style":"...","punch_volume":"low|medium|high","observations":["可见事实"]}}}},"momentum":{{"description":"画面可见的优劣态势","evidence":"direct|inferred|unknown"}},"global_observations":["可见事实"]}}""",
             0,
             duration,
         )
-
     def coarse_scan(self, start: float, end: float) -> dict[str, Any]:
         return self._generate(
-            f"""你是拳击视频候选事件检测器。只分析 {start:.2f} 到 {end:.2f} 秒窗口。
-均匀查看输入帧，找出可能的出拳动作，宁可漏检也不要把移动、举手、格挡或搂抱误报为拳。
-这一阶段只生成候选，不判断是否命中；空间接近不等于接触，接触也不等于有效命中。
+            f"""你是拳击视频候选事件检测器，只分析 {start:.2f} 到 {end:.2f} 秒窗口。
+你有权限精细描述，但每个候选必须基于窗口内可见帧，宁可漏检也不把移动、举手、格挡或搂抱误报为拳。
+
+输出要求：
+1. 只找疑似出拳动作，不判断是否命中；空间接近不等于接触。
+2. 动作窗口必须紧贴实际动作起止：起始=拳开始离开起始位置，结束=拳收回或到达终点，误差控制在 0.3 秒内。
+3. 连续组合拳：同一方连续多拳（间隔<1秒）标记为组合，用 sequence_id 关联，每拳仍是独立候选。
+4. 出手幅度：full=大幅度全伸，half=短促，unknown=看不清。
+5. 看不清出拳者、手、目标就写 unknown，不要猜。
+
 相对时间从窗口起点 0 秒开始，必须在 0 到 {end - start:.2f} 秒内。
-每个候选必须是一个独立动作；看不清出拳者、手、目标区域就写 unknown，不要猜。
 严格只返回一个 JSON 对象，不要 Markdown 或额外文本：
-{{"events":[{{"relative_start_sec":0.0,"relative_end_sec":0.0,"fighter":"red|blue|unknown","hand":"front|rear|unknown","target_region":"head|torso|miss|unknown","confidence":0.0}}]}}。
-confidence 是对“确实存在出拳动作”的信心，不是命中信心。没有候选时返回空数组。""",
+{{"events":[{{"relative_start_sec":0.0,"relative_end_sec":0.0,"fighter":"red|blue|unknown","hand":"front|rear|unknown","punch_type":"直拳|摆拳|勾拳|上勾拳|不确定","target_region":"head|torso|miss|unknown","amplitude":"full|half|unknown","sequence_id":1,"confidence":0.0}}]}}。
+confidence 是对"确实存在出拳动作"的信心，不是命中信心。没有候选返回空数组。""",
             start,
             end,
         )
-
     def fine_scan(self, start: float, end: float, candidate: dict[str, Any]) -> dict[str, Any]:
         return self._generate(
-            f"""你是拳击视频事件复核员。精细复核 {start:.2f} 到 {end:.2f} 秒窗口。
+            f"""你是拳击视频事件复核员，精细复核 {start:.2f} 到 {end:.2f} 秒窗口。
 候选标注仅供参考，可能错误，必须以窗口内可见帧为准：{json.dumps(candidate, ensure_ascii=False)}
-先确认是否真的有出拳，再独立判断出拳者、前后手、目标区域和结果。
-“hit”必须有清晰可见的拳套接触头部或躯干证据；仅仅拳套靠近、身体反应、姿势相似或遮挡下的推断都不能算 hit。
-“blocked”只在能看到防守动作拦截拳路时使用；完全看不清接触点使用 uncertain 或 occluded。
-区分 miss、blocked 和 uncertain：miss 是能看清未接触，blocked 是被防守动作拦截，uncertain 是证据不足。
-不要把搂抱、推搡、触碰手套、裁判介入或非拳击动作当作出拳。
+
+你有权限做深入分析，但每一条结论都必须有证据支撑，并在 evidence 字段标注来源：
+- direct：画面中直接可见
+- inferred：基于可见证据的合理推断
+- unknown：完全无法确认
+
+复核步骤（逐步执行，不要跳过）：
+1. 先确认是否真的有出拳；搂抱、推搡、触碰手套、裁判介入、非拳击动作一律不算。
+2. 判断出拳者、前后手、拳型、幅度（full/half）。
+3. 判断目标区域和命中部位细节：head_left/head_right/head_top/torso/arm_block/unknown。
+4. 判定结果：
+   - hit：画面中清晰看到拳套接触对方头部或躯干，或接触后对方出现可见反应（头部偏移、身体后仰、晃动），结合接触前一刻的拳路连续性。
+   - blocked：清晰看到防守动作（格挡、拍击、格架）在接触前拦截拳路。
+   - miss：清晰看到出拳轨迹且未触碰到对方。
+   - uncertain：证据不足、遮挡或镜头角度无法判断。
+5. 若判定 hit，补充：对方防守动作类型（格挡/后撤/摇闪/搂抱/无/看不清）、对方受击反应（明显偏移/轻微反应/无反应/遮挡看不清）、力度感（low/medium/high，基于手臂速度和位移的视觉估计，标注 inferred）。
+6. 判断是否属于组合拳的一部分（该候选前后 1 秒内是否有同方出拳），以及出拳后是否有立即反击。
+
 时间是相对窗口起点的秒数，必须位于 0 到 {end - start:.2f} 秒；无法精确定位时给出保守范围。
 严格只返回一个 JSON 对象，不要 Markdown 或额外文本：
-{{"is_punch":"yes|no|uncertain","start_time_sec":0.0,"peak_time_sec":0.0,"end_time_sec":0.0,"fighter":"red|blue|unknown","hand":"front|rear|unknown","punch_type":"直拳|勾拳|摆拳|不确定","target_region":"head|torso|miss|unknown","contact_evidence":"clear|possible|none|occluded","hit_or_miss":"hit|miss|blocked|uncertain","blocked":"yes|no|uncertain","occluded":"yes|no|uncertain","confidence":0.0,"reason":"用中文简述可见证据和不确定性"}}。
+{{"is_punch":"yes|no|uncertain","start_time_sec":0.0,"peak_time_sec":0.0,"end_time_sec":0.0,"fighter":"red|blue|unknown","hand":"front|rear|unknown","punch_type":"直拳|摆拳|勾拳|上勾拳|组合|不确定","amplitude":"full|half|unknown","target_region":"head|torso|miss|unknown","impact_area":"head_left|head_right|head_top|torso|arm_block|unknown","contact_evidence":"clear|possible|none|occluded","hit_or_miss":"hit|miss|blocked|uncertain","blocked":"yes|no|uncertain","block_type":"格挡|后撤|摇闪|搂抱|无|看不清","reaction":"明显偏移|轻微反应|无反应|遮挡看不清","power":"low|medium|high|unknown","part_of_combo":"yes|no|uncertain","countered":"yes|no|uncertain","occluded":"yes|no|uncertain","confidence":0.0,"evidence":"direct|inferred|unknown","reason":"用中文写出可见证据链和不确定性，2-4句，具体到动作细节"}}。
 confidence 是对整条复核结论的信心；看不到接触必须降低信心并避免使用 hit。""",
             start,
             end,
         )
-
     def stats(self) -> dict[str, Any]:
         return {
             "vlm_status": self.status,

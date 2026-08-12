@@ -1,0 +1,255 @@
+{
+  "video": "inputs/Olympic Boxing Punch Classification Video Dataset/task_kam2_gh098416/data/GH098416.mp4",
+  "duration_sec": 121.42,
+  "summary": {
+    "review_status": "reviewed",
+    "review_model": "qwen3-vl-plus",
+    "review_provider": "bailian",
+    "media_mode": "images",
+    "summary": "比赛全程121.42秒，无明确回合信号，按节奏划分为阶段。开场双方试探（0-17s），随后蓝方（橙装）主动前压、高频出拳，红方（红装）以防守反击为主；34-69秒进入对攻期，蓝方多次突进并命中头部，红方偶有还击但多被格挡；86s后节奏放缓，双方移动减少，出现搂抱与裁判介入；104s起比赛结束迹象明显，双方退至角落接受指导。蓝方整体更主动，红方偏保守。",
+    "rounds": [],
+    "phases": [
+      {
+        "start_time_sec": 0.0,
+        "end_time_sec": 17.346,
+        "label": "试探期",
+        "evidence": "direct"
+      },
+      {
+        "start_time_sec": 17.346,
+        "end_time_sec": 69.383,
+        "label": "对攻期",
+        "evidence": "direct"
+      },
+      {
+        "start_time_sec": 69.383,
+        "end_time_sec": 86.729,
+        "label": "消耗期",
+        "evidence": "inferred"
+      },
+      {
+        "start_time_sec": 86.729,
+        "end_time_sec": 121.42,
+        "label": "尾声",
+        "evidence": "direct"
+      }
+    ],
+    "key_moments": [
+      {
+        "time_sec": 34.691,
+        "description": "蓝方左直拳击中红方头部，红方后撤并举臂格挡",
+        "evidence": "direct"
+      },
+      {
+        "time_sec": 52.037,
+        "description": "蓝方连续三拳（刺拳-摆拳-勾拳）组合进攻，红方低头躲闪后退至围绳",
+        "evidence": "direct"
+      },
+      {
+        "time_sec": 69.383,
+        "description": "蓝方前冲时被红方迎击右摆拳击中面部，短暂停顿",
+        "evidence": "direct"
+      },
+      {
+        "time_sec": 86.729,
+        "description": "双方近身搂抱持续约5秒，裁判分开二人",
+        "evidence": "direct"
+      },
+      {
+        "time_sec": 104.074,
+        "description": "红方走向角落，蓝方被教练接手调整装备，比赛实质结束",
+        "evidence": "direct"
+      }
+    ],
+    "fighter_analysis": {
+      "red": {
+        "style": "防守反击型（推断）：多采用后手架势、侧步移动，出拳谨慎，常在对方收拳间隙反击；极少主动压迫距离",
+        "punch_volume": "medium",
+        "observations": [
+          "可见多次格挡与低头躲闪动作",
+          "在34.691s、69.383s有清晰还击动作",
+          "多数时间保持中远距离，未见持续近身缠斗"
+        ]
+      },
+      "blue": {
+        "style": "进攻主导型（推断）：频繁前滑步逼近，出拳密度高，偏好左直拳开路+右摆拳跟进；主动控制中心区域",
+        "punch_volume": "high",
+        "observations": [
+          "17.346s起持续前压，步频明显高于红方",
+          "34.691s、52.037s、69.383s均有连击动作",
+          "多次击中红方头部/躯干（可见受击反应）"
+        ]
+      }
+    },
+    "momentum": {
+      "description": "蓝方在34–69秒占据主动，控制中心区域并多次有效命中；红方被动防守，仅零星反击成功；86秒后双方体能下降，节奏趋缓，无明显优势转移",
+      "evidence": "direct"
+    },
+    "global_observations": [
+      "无电子计时器或铃声提示回合开始/结束",
+      "裁判在86.729s介入搂抱，动作规范",
+      "观众席有人持手机拍摄，其中一人穿印有'GUKS CARBO'字样T恤",
+      "红方背心印有'LS GÓRAL 1956 ŻYWIEC'字样，蓝方无清晰标识",
+      "场地为室内篮球馆改造拳台，背景有三幅赛事横幅"
+    ]
+  },
+  "candidates": [
+    {
+      "relative_start_sec": 1.14,
+      "relative_end_sec": 1.71,
+      "fighter": "blue",
+      "hand": "rear",
+      "punch_type": "直拳",
+      "target_region": "head",
+      "amplitude": "full",
+      "sequence_id": 1,
+      "confidence": 0.9,
+      "start_time_sec": 1.14,
+      "end_time_sec": 1.71
+    },
+    {
+      "relative_start_sec": 2.29,
+      "relative_end_sec": 2.86,
+      "fighter": "red",
+      "hand": "rear",
+      "punch_type": "直拳",
+      "target_region": "head",
+      "amplitude": "full",
+      "sequence_id": 2,
+      "confidence": 0.95,
+      "start_time_sec": 2.29,
+      "end_time_sec": 2.86
+    },
+    {
+      "relative_start_sec": 4.857,
+      "relative_end_sec": 5.286,
+      "fighter": "red",
+      "hand": "front",
+      "punch_type": "直拳",
+      "target_region": "head",
+      "amplitude": "full",
+      "sequence_id": 1,
+      "confidence": 0.95,
+      "start_time_sec": 8.857,
+      "end_time_sec": 9.286
+    },
+    {
+      "relative_start_sec": 6.0,
+      "relative_end_sec": 6.429,
+      "fighter": "blue",
+      "hand": "rear",
+      "punch_type": "直拳",
+      "target_region": "torso",
+      "amplitude": "full",
+      "sequence_id": 2,
+      "confidence": 0.9,
+      "start_time_sec": 10.0,
+      "end_time_sec": 10.429
+    },
+    {
+      "relative_start_sec": 7.143,
+      "relative_end_sec": 7.571,
+      "fighter": "red",
+      "hand": "rear",
+      "punch_type": "勾拳",
+      "target_region": "torso",
+      "amplitude": "half",
+      "sequence_id": 3,
+      "confidence": 0.85,
+      "start_time_sec": 11.143,
+      "end_time_sec": 11.571
+    }
+  ],
+  "fine_events": [
+    {
+      "review_status": "reviewed",
+      "review_model": "qwen3-vl-plus",
+      "review_provider": "bailian",
+      "media_mode": "images",
+      "is_punch": "yes",
+      "start_time_sec": 1.79,
+      "peak_time_sec": 1.9899999999999998,
+      "end_time_sec": 2.19,
+      "fighter": "red",
+      "hand": "rear",
+      "punch_type": "直拳",
+      "amplitude": "full",
+      "target_region": "head",
+      "impact_area": "head_left",
+      "contact_evidence": "clear",
+      "hit_or_miss": "hit",
+      "blocked": "no",
+      "block_type": "无",
+      "reaction": "明显偏移",
+      "power": "medium",
+      "part_of_combo": "no",
+      "countered": "no",
+      "occluded": "no",
+      "confidence": 0.95,
+      "evidence": "direct",
+      "reason": "在1.299秒帧中，红方选手（橙色装备）后手直拳前伸，拳路清晰；1.551秒帧显示拳套已接触蓝方头部左侧，蓝方头部明显向右后方偏移；1.804秒帧中蓝方仍处于受击后晃动状态，无格挡动作。裁判位于侧后方未遮挡视线，接触瞬间完整可见。",
+      "candidate": {
+        "relative_start_sec": 1.14,
+        "relative_end_sec": 1.71,
+        "fighter": "blue",
+        "hand": "rear",
+        "punch_type": "直拳",
+        "target_region": "head",
+        "amplitude": "full",
+        "sequence_id": 1,
+        "confidence": 0.9,
+        "start_time_sec": 1.14,
+        "end_time_sec": 1.71
+      }
+    },
+    {
+      "review_status": "reviewed",
+      "review_model": "qwen3-vl-plus",
+      "review_provider": "bailian",
+      "media_mode": "images",
+      "is_punch": "yes",
+      "start_time_sec": 3.886,
+      "peak_time_sec": 4.138999999999999,
+      "end_time_sec": 4.391,
+      "fighter": "red",
+      "hand": "rear",
+      "punch_type": "直拳",
+      "amplitude": "full",
+      "target_region": "head",
+      "impact_area": "head_left",
+      "contact_evidence": "clear",
+      "hit_or_miss": "hit",
+      "blocked": "no",
+      "block_type": "无",
+      "reaction": "明显偏移",
+      "power": "medium",
+      "part_of_combo": "no",
+      "countered": "no",
+      "occluded": "no",
+      "confidence": 0.98,
+      "evidence": "direct",
+      "reason": "在2.196秒红方后手启动出拳，2.449秒拳套清晰接触蓝方头部左侧（可见拳套与头盔接触瞬间及蓝方头部向右明显偏移），2.701秒红方手臂已回撤；全程无格挡动作，裁判未介入；蓝方未做摇闪或后撤，属直接命中。",
+      "candidate": {
+        "relative_start_sec": 2.29,
+        "relative_end_sec": 2.86,
+        "fighter": "red",
+        "hand": "rear",
+        "punch_type": "直拳",
+        "target_region": "head",
+        "amplitude": "full",
+        "sequence_id": 2,
+        "confidence": 0.95,
+        "start_time_sec": 2.29,
+        "end_time_sec": 2.86
+      }
+    }
+  ],
+  "vlm_status": "enabled",
+  "vlm_provider": "bailian",
+  "vlm_model": "qwen3-vl-plus",
+  "vlm_base_url": "https://llm-qi84d3ky9lhum2dr.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+  "vlm_media_mode": "images",
+  "vlm_calls": 10,
+  "vlm_failures": 0,
+  "vlm_last_error": ""
+}
