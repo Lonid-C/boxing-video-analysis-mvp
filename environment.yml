@@ -1,0 +1,15 @@
+name: boxing_mvp
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - ultralytics>=8.3,<9
+      - opencv-python-headless>=4.10,<5
+      - numpy>=1.26,<3
+      - pyyaml>=6,<7
+      - tqdm>=4.66,<5
