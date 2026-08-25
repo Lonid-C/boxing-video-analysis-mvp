@@ -1,5 +1,7 @@
 __pycache__/
 *.py[cod]
+.pytest_cache/
+.coverage
 .env
 *.env
 outputs/*
@@ -18,3 +20,6 @@ uploads/
 *.sqlite*
 *.log
 .DS_Store
+04_exports/
+90_archive/
+boxing_readme.*

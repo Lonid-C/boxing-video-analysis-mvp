@@ -5,6 +5,9 @@ import json
 import os
 import urllib.error
 import urllib.request
+from math import ceil
+import random
+import time
 from pathlib import Path
 from typing import Any
 
@@ -28,12 +31,14 @@ class VLMReviewer:
         timeout: float = 180.0,
         enabled: bool = True,
         media_mode: str = "images",
+        max_retries: int = 2,
     ) -> None:
         self.api_key = api_key or os.getenv("BAILIAN_API_KEY") or os.getenv("DASHSCOPE_API_KEY")
         self.base_url = (base_url or os.getenv("BAILIAN_BASE_URL") or
                          "https://dashscope.aliyuncs.com/compatible-mode/v1").rstrip("/")
         self.model = model or os.getenv("BAILIAN_MODEL") or "qwen-vl-max"
         self.timeout = timeout
+        self.max_retries = max(0, int(max_retries))
         self.media_mode = media_mode if media_mode in ("auto", "video", "images") else "images"
         self.active_media_mode = "video" if self.media_mode == "video" else "images"
         self.enabled = bool(enabled and self.api_key)
@@ -49,21 +54,28 @@ class VLMReviewer:
         return "enabled" if self.enabled else ("no_api_key" if not self.api_key else "disabled")
 
     def _json_request(self, body: dict[str, Any]) -> dict[str, Any]:
-        request = urllib.request.Request(
-            f"{self.base_url}/chat/completions",
-            data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
-            method="POST",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {self.api_key}",
-            },
-        )
-        try:
-            with urllib.request.urlopen(request, timeout=self.timeout) as response:
-                return json.loads(response.read().decode("utf-8"))
-        except urllib.error.HTTPError as exc:
-            detail = exc.read().decode("utf-8", errors="replace")[:500]
-            raise RuntimeError(f"Bailian HTTP {exc.code}: {detail}") from exc
+        payload = json.dumps(body, ensure_ascii=False).encode("utf-8")
+        for attempt in range(self.max_retries + 1):
+            request = urllib.request.Request(
+                f"{self.base_url}/chat/completions", data=payload, method="POST",
+                headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.api_key}"},
+            )
+            try:
+                with urllib.request.urlopen(request, timeout=self.timeout) as response:
+                    value = json.loads(response.read().decode("utf-8"))
+                    if not isinstance(value, dict):
+                        raise ValueError("Bailian response is not a JSON object")
+                    return value
+            except urllib.error.HTTPError as exc:
+                detail = exc.read().decode("utf-8", errors="replace")[:500]
+                retryable = exc.code in {408, 409, 425, 429, 500, 502, 503, 504}
+                error: Exception = RuntimeError(f"Bailian HTTP {exc.code}: {detail}")
+            except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
+                retryable, error = True, RuntimeError(f"Bailian transport error: {exc}")
+            if not retryable or attempt >= self.max_retries:
+                raise error
+            time.sleep((2 ** attempt) + random.random() * 0.25)
+        raise RuntimeError("Bailian request retry loop exhausted")
 
     def upload_video(self, path: str, public_url: str | None = None) -> dict[str, Any]:
         if not self.enabled:
@@ -117,12 +129,13 @@ class VLMReviewer:
             return "".join(item.get("text", "") for item in content if isinstance(item, dict))
         raise ValueError("Bailian response content is not text")
 
-    def _request(self, prompt: str, start: float, end: float) -> dict[str, Any]:
+    def _request(self, prompt: str, start: float, end: float,
+                 image_count: int = 8) -> dict[str, Any]:
         if self.active_media_mode == "video":
             part = self._video_part()
             content = ([part] if part else []) + [{"type": "text", "text": prompt}]
         else:
-            content = [{"type": "text", "text": prompt}] + self._image_parts(start, end)
+            content = [{"type": "text", "text": prompt}] + self._image_parts(start, end, image_count)
         body = {
             "model": self.model,
             "messages": [{"role": "user", "content": content}],
@@ -139,18 +152,19 @@ class VLMReviewer:
             **self.parse_json(text),
         }
 
-    def _generate(self, prompt: str, start: float = 0.0, end: float | None = None) -> dict[str, Any]:
+    def _generate(self, prompt: str, start: float = 0.0, end: float | None = None,
+                  image_count: int = 8) -> dict[str, Any]:
         if not self.enabled or not self.video_path:
             return {"review_status": "not_reviewed"}
         end = self.duration if end is None else end
         try:
-            return self._request(prompt, start, end)
+            return self._request(prompt, start, end, image_count)
         except Exception as exc:
             self.last_error = str(exc)[:500]
             if self.media_mode == "auto" and self.active_media_mode == "video":
                 self.active_media_mode = "images"
                 try:
-                    return self._request(prompt, start, end)
+                    return self._request(prompt, start, end, image_count)
                 except Exception as fallback_exc:
                     self.last_error = str(fallback_exc)[:500]
             self.failures += 1
@@ -182,12 +196,14 @@ class VLMReviewer:
 3. 关键时间点：找出比赛节奏变化的关键时间戳（例如某一方突然提速、出现决定性连击、某方开始搂抱消耗时间）。
 4. 出拳统计：对每一方估计全场出拳总量级（low<20拳 / medium 20-60拳 / high>60拳）和命中总量级，标注为估计，不要假装精确。
 5. 胜负趋势：只描述画面可见的优劣态势（谁控制距离、谁压迫、谁被击中更多），不宣布胜负。
+6. 单目视频不能可靠换算真实米制距离、速度、力度数值或生理指标；不得输出 m、米、km/h 等数值。
 
 所有时间用整段视频绝对秒数，范围 0 到 {duration:.2f}。
 严格只返回一个 JSON 对象，不要 Markdown、解释或额外文本：
 {{"summary":"中文摘要，300字以内，结构清晰","rounds":[{{"start_time_sec":0.0,"end_time_sec":0.0,"description":"只写可见事实"}}],"phases":[{{"start_time_sec":0.0,"end_time_sec":0.0,"label":"试探期/对攻期/消耗期/尾声","evidence":"direct|inferred|unknown"}}],"key_moments":[{{"time_sec":0.0,"description":"关键事件描述","evidence":"direct|inferred|unknown"}}],"fighter_analysis":{{"red":{{"style":"...","punch_volume":"low|medium|high","observations":["可见事实"]}},"blue":{{"style":"...","punch_volume":"low|medium|high","observations":["可见事实"]}}}},"momentum":{{"description":"画面可见的优劣态势","evidence":"direct|inferred|unknown"}},"global_observations":["可见事实"]}}""",
             0,
             duration,
+            image_count=min(48, max(12, ceil(duration / 10))),
         )
     def coarse_scan(self, start: float, end: float) -> dict[str, Any]:
         return self._generate(
@@ -213,6 +229,8 @@ confidence 是对"确实存在出拳动作"的信心，不是命中信心。没�
             f"""你是拳击视频事件复核员，精细复核 {start:.2f} 到 {end:.2f} 秒窗口。
 候选标注仅供参考，可能错误，必须以窗口内可见帧为准：{json.dumps(candidate, ensure_ascii=False)}
 
+候选的 side/fighter 来自逐帧红蓝颜色跟踪；候选 hand 是 COCO 骨架的解剖左手/右手，不代表前手/后手。若你判断实际出拳者与候选颜色不同，仍按画面填写真实 fighter；系统会把这种身份冲突保留为待人工核查，而不会自动计入正式事件。
+
 你有权限做深入分析，但每一条结论都必须有证据支撑，并在 evidence 字段标注来源：
 - direct：画面中直接可见
 - inferred：基于可见证据的合理推断
@@ -230,12 +248,14 @@ confidence 是对"确实存在出拳动作"的信心，不是命中信心。没�
 5. 若判定 hit，补充：对方防守动作类型（格挡/后撤/摇闪/搂抱/无/看不清）、对方受击反应（明显偏移/轻微反应/无反应/遮挡看不清）、力度感（low/medium/high，基于手臂速度和位移的视觉估计，标注 inferred）。
 6. 判断是否属于组合拳的一部分（该候选前后 1 秒内是否有同方出拳），以及出拳后是否有立即反击。
 
-时间是相对窗口起点的秒数，必须位于 0 到 {end - start:.2f} 秒；无法精确定位时给出保守范围。
+时间必须使用整段视频绝对秒数，必须位于 {start:.3f} 到 {end:.3f} 秒；图片前的“帧时间”也是整段视频绝对时间。
+start_time_sec < end_time_sec，peak_time_sec 必须位于二者之间。无法定位有效持续区间时，将 is_punch 写为 no，不要返回零长度事件。
 严格只返回一个 JSON 对象，不要 Markdown 或额外文本：
 {{"is_punch":"yes|no|uncertain","start_time_sec":0.0,"peak_time_sec":0.0,"end_time_sec":0.0,"fighter":"red|blue|unknown","hand":"front|rear|unknown","punch_type":"直拳|摆拳|勾拳|上勾拳|组合|不确定","amplitude":"full|half|unknown","target_region":"head|torso|miss|unknown","impact_area":"head_left|head_right|head_top|torso|arm_block|unknown","contact_evidence":"clear|possible|none|occluded","hit_or_miss":"hit|miss|blocked|uncertain","blocked":"yes|no|uncertain","block_type":"格挡|后撤|摇闪|搂抱|无|看不清","reaction":"明显偏移|轻微反应|无反应|遮挡看不清","power":"low|medium|high|unknown","part_of_combo":"yes|no|uncertain","countered":"yes|no|uncertain","occluded":"yes|no|uncertain","confidence":0.0,"evidence":"direct|inferred|unknown","reason":"用中文写出可见证据链和不确定性，2-4句，具体到动作细节"}}。
 confidence 是对整条复核结论的信心；看不到接触必须降低信心并避免使用 hit。""",
             start,
             end,
+            image_count=min(20, max(10, ceil((end - start) * 8))),
         )
     def stats(self) -> dict[str, Any]:
         return {

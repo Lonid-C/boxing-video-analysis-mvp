@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any
+from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 class VideoCreate(BaseModel):
     path: str
@@ -14,7 +14,7 @@ class VideoOut(VideoCreate):
     name: str
 class RunCreate(BaseModel):
     video_id: str
-    mode: str = "cv"
+    mode: Literal["cv", "summary", "scan", "all"] = "cv"
     params: dict[str, Any] = Field(default_factory=dict)
 class RunOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -45,3 +45,11 @@ class TrackOut(BaseModel):
     frame_index: int
     time_sec: float | None
     people: list[dict[str, Any]]
+class ArtifactOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    run_id: str
+    kind: str
+    path: str
+    mime_type: str | None
+    media_url: str | None = None

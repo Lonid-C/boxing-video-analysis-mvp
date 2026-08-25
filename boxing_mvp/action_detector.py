@@ -62,7 +62,7 @@ class _HandState:
 
 @dataclass
 class _FighterState:
-    hands: dict[str, _HandState] = field(default_factory=lambda: {"front": _HandState(), "rear": _HandState()})
+    hands: dict[str, _HandState] = field(default_factory=lambda: {"left": _HandState(), "right": _HandState()})
 
 
 class PunchDetector:
@@ -111,7 +111,9 @@ class PunchDetector:
         shoulder_mid = self._mid(shoulder_l, shoulder_r)
         hip_mid = self._mid(hip_l, hip_r)
         outputs: list[PunchEvent] = []
-        for hand, wrist_index, elbow_index in (("front", L_WRIST, L_ELBOW), ("rear", R_WRIST, R_ELBOW)):
+        # COCO keypoints encode anatomical left/right. Front/rear depends on
+        # stance and cannot be inferred reliably from keypoint index alone.
+        for hand, wrist_index, elbow_index in (("left", L_WRIST, L_ELBOW), ("right", R_WRIST, R_ELBOW)):
             wrist = PoseEstimator.point(pose, wrist_index)
             elbow = PoseEstimator.point(pose, elbow_index)
             hs = state.hands[hand]

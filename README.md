@@ -144,6 +144,14 @@ PYTHONPATH=. python -m boxing_mvp.main \
   --vlm --vlm-mode all --vlm-media-mode images --no-display
 ```
 
+`--vlm` 是显式费用开关：即使环境中已经存在 API Key，不传该参数也不会调用百炼。
+扫描默认使用 `CV 候选 → VLM 精扫`，调用量约等于 CV 候选数。只有需要脱离 CV
+主动扫描整段视频时才增加 `--vlm-scan-source coarse`；该模式会按滑窗产生较多调用。
+
+分析默认还会在 stats 文件同级生成 `<名称>_package/` 完整结果包，包括三张 CSV、
+红蓝双方移动热力图、HTML 报告和带 10 秒总结片尾的视频。使用 `--no-export`
+关闭，或用 `--export-dir` 指定目录、`--end-card-seconds` 调整每页片尾时长。
+
 ## 启动 Web Demo
 
 ```bash
@@ -160,7 +168,13 @@ POST /api/v1/runs
 GET  /api/v1/runs/{run_id}
 GET  /api/v1/runs/{run_id}/events
 GET  /api/v1/runs/{run_id}/tracks
+GET  /api/v1/runs/{run_id}/artifacts
 ```
+
+`artifacts` 会返回 CSV、热力图、HTML 和总结视频的类型、MIME 类型及媒体 URL。
+
+Web 后台默认一次只执行一个分析任务，避免同时占满 GPU、内存和 VLM 配额；需要提高并发时
+设置 `BOXING_MAX_CONCURRENT_RUNS`。每个任务使用 `outputs/runs/<run_id>/` 独立目录。
 
 ## 项目结构
 
@@ -175,4 +189,3 @@ scripts/init_db.py       初始化数据库
 ## 下一步
 
 当前版本重点是验证“候选召回 → VLM 复核 → 可回放结果”是否可用。下一阶段会加入 Redis/Celery 任务队列、用户权限、私有 OSS 短期 URL、PostgreSQL、任务重试和更完整的前端可视化。
-
